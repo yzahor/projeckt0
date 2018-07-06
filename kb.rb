@@ -14,6 +14,7 @@ template do
   parameter 'KeyName',
             :Description => 'Name of an existing EC2 KeyPair to enable SSH access to the instance',
             :Type => 'AWS::EC2::KeyPair::KeyName',
+            :Default => 'free_tier_keys',
             :ConstraintDescription => 'must be the name of an existing EC2 KeyPair.'
 
   parameter 'InstanceType',
@@ -22,6 +23,13 @@ template do
             :Default => 't2.micro',
             :AllowedValues => %w(t1.micro t2.nano t2.micro t2.small t2.medium t2.large m1.small m1.medium m1.large m1.xlarge m2.xlarge m2.2xlarge m2.4xlarge m3.medium m3.large m3.xlarge m3.2xlarge m4.large m4.xlarge m4.2xlarge m4.4xlarge m4.10xlarge c1.medium c1.xlarge c3.large c3.xlarge c3.2xlarge c3.4xlarge c3.8xlarge c4.large c4.xlarge c4.2xlarge c4.4xlarge c4.8xlarge g2.2xlarge g2.8xlarge r3.large r3.xlarge r3.2xlarge r3.4xlarge r3.8xlarge i2.xlarge i2.2xlarge i2.4xlarge i2.8xlarge d2.xlarge d2.2xlarge d2.4xlarge d2.8xlarge hi1.4xlarge hs1.8xlarge cr1.8xlarge cc2.8xlarge cg1.4xlarge),
             :ConstraintDescription => 'must be a valid EC2 instance type.'
+  
+  parameter 'ImageId',
+            :Description => 'EC2 Image ID',
+            :Type => 'String',
+            :Default => 'ami-6a003c0f',
+            :AllowedPattern => 'ami-[a-f0-9]{8}',
+            :ConstraintDescription => 'Must be ami-XXXXXXXX (where X is a hexadecimal digit)'
 
   parameter 'SSHLocation',
             :Description => 'The IP address range that can be used to SSH to the EC2 instances',
@@ -35,7 +43,7 @@ template do
   mapping 'AWSInstanceType2Arch',
           # :'t1.micro' => { :Arch => 'PV64' },
           # :'t2.nano' => { :Arch => 'HVM64' },
-          :'t2.micro' => { :Arch => 'HVM64' },
+          :'t2.micro' => { :Arch => 'HVM64' }
           # :'t2.small' => { :Arch => 'HVM64' },
           # :'t2.medium' => { :Arch => 'HVM64' },
           # :'t2.large' => { :Arch => 'HVM64' },
@@ -87,10 +95,10 @@ template do
           # :'cr1.8xlarge' => { :Arch => 'HVM64' },
           # :'cc2.8xlarge' => { :Arch => 'HVM64' }
 
-  mapping 'AWSInstanceType2NATArch',
+  # mapping 'AWSInstanceType2NATArch',
           # :'t1.micro' => { :Arch => 'NATPV64' },
           # :'t2.nano' => { :Arch => 'NATHVM64' },
-          :'t2.micro' => { :Arch => 'NATHVM64' },
+          #:'t2.micro' => { :Arch => 'NATHVM64' },
           # :'t2.small' => { :Arch => 'NATHVM64' },
           # :'t2.medium' => { :Arch => 'NATHVM64' },
           # :'t2.large' => { :Arch => 'NATHVM64' },
@@ -156,7 +164,7 @@ template do
           # :'ap-southeast-1' => { :PV64 => 'ami-df9e4cbc', :HVM64 => 'ami-68097514', :HVMG2 => 'ami-c06013bc' },
           # :'ap-southeast-2' => { :PV64 => 'ami-63351d00', :HVM64 => 'ami-942dd1f6', :HVMG2 => 'ami-85ef12e7' },
           # :'ap-south-1' => { :PV64 => 'NOT_SUPPORTED', :HVM64 => 'ami-531a4c3c', :HVMG2 => 'ami-411e492e' },
-          :'us-east-2' => { :PV64 => 'NOT_SUPPORTED', :HVM64 => 'ami-40142d25', :HVMG2 => 'NOT_SUPPORTED' },
+          :'us-east-2' => { :PV64 => 'NOT_SUPPORTED', :HVM64 => 'ami-6a003c0f', :HVMG2 => 'NOT_SUPPORTED' }
           # :'ca-central-1' => { :PV64 => 'NOT_SUPPORTED', :HVM64 => 'ami-a954d1cd', :HVMG2 => 'NOT_SUPPORTED' },
           # :'sa-east-1' => { :PV64 => 'ami-1ad34676', :HVM64 => 'ami-84175ae8', :HVMG2 => 'NOT_SUPPORTED' },
           # :'cn-north-1' => { :PV64 => 'ami-77559f1a', :HVM64 => 'ami-cb19c4a6', :HVMG2 => 'NOT_SUPPORTED' },
