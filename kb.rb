@@ -63,20 +63,20 @@ template do
           # :'m4.2xlarge' => { :Arch => 'HVM64' },
           # :'m4.4xlarge' => { :Arch => 'HVM64' },
           # :'m4.10xlarge' => { :Arch => 'HVM64' },
-          # :'c1.medium' => { :Arch => 'PV64' },
-          # :'c1.xlarge' => { :Arch => 'PV64' },
-          # :'c3.large' => { :Arch => 'HVM64' },
-          # :'c3.xlarge' => { :Arch => 'HVM64' },
+          # :'c1.medium' => { :Aus-east-1rch => 'PV64' },
+          # :'c1.xlarge' => { :Aus-east-1rch => 'PV64' },
+          # :'c3.large' => { :Arus-east-1ch => 'HVM64' },
+          # :'c3.xlarge' => { :Aus-east-1rch => 'HVM64' },
           # :'c3.2xlarge' => { :Arch => 'HVM64' },
           # :'c3.4xlarge' => { :Arch => 'HVM64' },
-          # :'c3.8xlarge' => { :Arch => 'HVM64' },
+          # :'c3.8xlarge' => { :Arch => 'HVM64' },Форкнул интересный 
           # :'c4.large' => { :Arch => 'HVM64' },
           # :'c4.xlarge' => { :Arch => 'HVM64' },
-          # :'c4.2xlarge' => { :Arch => 'HVM64' },
-          # :'c4.4xlarge' => { :Arch => 'HVM64' },
-          # :'c4.8xlarge' => { :Arch => 'HVM64' },
-          # :'g2.2xlarge' => { :Arch => 'HVMG2' },
-          # :'g2.8xlarge' => { :Arch => 'HVMG2' },
+          # :'c4.2xlarge' => { :Arch => 'HVM64' },Форкнул интересный 
+          # :'c4.4xlarge' => { :Arch => 'HVM64' },Форкнул интересный 
+          # :'c4.8xlarge' => { :Arch => 'HVM64' },Форкнул интересный 
+          # :'g2.2xlarge' => { :Arch => 'HVMG2' },Форкнул интересный 
+          # :'g2.8xlarge' => { :Arch => 'HVMG2' },Форкнул интересный 
           # :'r3.large' => { :Arch => 'HVM64' },
           # :'r3.xlarge' => { :Arch => 'HVM64' },
           # :'r3.2xlarge' => { :Arch => 'HVM64' },
