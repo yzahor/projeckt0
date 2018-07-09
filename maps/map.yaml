@@ -1,0 +1,5 @@
+---
+Mappings:
+  YamlExampleMap:
+    foo:
+      bar: yo

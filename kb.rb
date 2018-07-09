@@ -11,7 +11,19 @@ template do
 
   value :Description => 'AWS CloudFormation Sample Template EC2InstanceWithSecurityGroupSample: Create an Amazon EC2 instance running the Amazon Linux AMI. The AMI is chosen based on the region in which the stack is run. This example creates an EC2 security group for the instance to give you SSH access. **WARNING** This template creates an Amazon EC2 instance. You will be billed for the AWS resources used if you create a stack from this template.'
 
-  parameter 'KeyName',
+  
+  parameter 'Label',
+            :Description => 'The label to apply to the servers.',
+            :Type => 'String',
+            :MinLength => '2',
+            :MaxLength => '25',
+            :AllowedPattern => '[_a-zA-Z0-9]*',
+            :ConstraintDescription => 'Maximum length of the Label parameter may not exceed 25 characters and may only contain letters, numbers and underscores.',
+            # The :Immutable attribute is a Ruby CFN extension.  It affects the behavior of the '<template> update ...'
+            # operation in that a stack update may not change the values of parameters marked w/:Immutable => true.
+            :Immutable => true
+  
+  parameter 'KeyPairName',
             :Description => 'Name of an existing EC2 KeyPair to enable SSH access to the instance',
             :Type => 'AWS::EC2::KeyPair::KeyName',
             :Default => 'free_tier_keys',
@@ -170,39 +182,125 @@ template do
           # :'cn-north-1' => { :PV64 => 'ami-77559f1a', :HVM64 => 'ami-cb19c4a6', :HVMG2 => 'NOT_SUPPORTED' },
           # :'cn-northwest-1' => { :PV64 => 'ami-80707be2', :HVM64 => 'ami-3e60745c', :HVMG2 => 'NOT_SUPPORTED' }
 
-  resource 'EC2Instance', :Type => 'AWS::EC2::Instance', :Properties => {
-      :InstanceType => ref('InstanceType'),
-      :SecurityGroups => [ ref('InstanceSecurityGroup') ],
-      :KeyName => ref('KeyName'),
-      :ImageId => find_in_map('AWSRegionArch2AMI', aws_region, find_in_map('AWSInstanceType2Arch', ref('InstanceType'), 'Arch')),
-  }
+#   resource 'EC2Instance', :Type => 'AWS::EC2::Instance', :Properties => {
+#             :InstanceType => ref('InstanceType'),
+#             :SecurityGroups => [ ref('SecurityGroup') ],
+#             :KeyName => ref('KeyPairName'),
+#             :ImageId => find_in_map('AWSRegionArch2AMI', aws_region, find_in_map('AWSInstanceType2Arch', ref('InstanceType'), 'Arch')),
+#   }
 
-  resource 'InstanceSecurityGroup', :Type => 'AWS::EC2::SecurityGroup', :Properties => {
-      :GroupDescription => 'Enable SSH access via port 22',
-      :SecurityGroupIngress => [
-          {
-              :IpProtocol => 'tcp',
-              :FromPort => '22',
-              :ToPort => '22',
-              :CidrIp => ref('SSHLocation'),
-          },
+  resource 'SecurityGroup', :Type => 'AWS::EC2::SecurityGroup', :Properties => {
+            :GroupDescription => 'Enable SSH access via port 22',
+            :SecurityGroupIngress => [
+            {
+            :IpProtocol => 'tcp',
+            :FromPort => '22',
+            :ToPort => '22',
+            :CidrIp => ref('SSHLocation'),
+            },
       ],
   }
 
-  output 'InstanceId',
-         :Description => 'InstanceId of the newly created EC2 instance',
-         :Value => ref('EC2Instance')
 
-  output 'AZ',
-         :Description => 'Availability Zone of the newly created EC2 instance',
-         :Value => get_att('EC2Instance', 'AvailabilityZone')
+  # Selects all rows in the table which match the name/value pairs of the predicate object and returns a
+  # set of nested maps, where the key for the map at level n is the key at index n in the specified keys,
+  # except for the last key in the specified keys which is used to determine the value of the leaf-level map.
+    text = Table.load 'maps/table.txt'
+    mapping 'TableExampleMap',
+        text.get_map({ :column0 => 'foo' }, :column1, :column2, :column3)
 
-  output 'PublicDNS',
-         :Description => 'Public DNSName of the newly created EC2 instance',
-         :Value => get_att('EC2Instance', 'PublicDnsName')
+  # The tag type is a DSL extension; it is not a property of actual CloudFormation templates.
+  #   These tags are excised from the template and used to generate a series of --tag arguments
+  #   which are passed to CloudFormation when a stack is created.
+  #   They do not ultimately appear in the expanded CloudFormation template.
+  #   The diff subcommand will compare tags with the running stack and identify any changes,
+  #   but a stack update will do the diff and throw an error on any immutable tags update attempt.
+  #   The tags are propagated to all resources created by the stack, including the stack itself.
+  #   If a resource has its own tag with the same name as CF's it's not overwritten.
+  #
+  # Amazon has set the following restrictions on CloudFormation tags:
+  #   => limit 10
+  # CloudFormation tags declaration examples:
 
-  output 'PublicIP',
-         :Description => 'Public IP address of the newly created EC2 instance',
-         :Value => get_att('EC2Instance', 'PublicIp')
+  tag 'My:New:Tag',
+      :Value => 'ImmutableTagValue',
+      :Immutable => true
+
+  tag :MyOtherTag,
+      :Value => 'My Value With Spaces'
+
+  tag(:"tag:name", :Value => 'tag_value', :Immutable => true)
+
+  # Following format is deprecated and not advised. Please declare CloudFormation tags as described above.
+  #tag :TagName => 'tag_value'    # It's immutable.
+
+        
+  resource "ASG", :Type => 'AWS::AutoScaling::AutoScalingGroup', :Properties => {
+            :AvailabilityZones => 'us-east-2',
+            :HealthCheckType => 'EC2',
+            :LaunchConfigurationName => ref('LaunchConfig'),
+            :MinSize => 1,
+            :MaxSize => 2,
+            # :NotificationConfiguration => {
+            #     :TopicARN => ref('EmailSNSTopic'),
+            #     :NotificationTypes => %w(autoscaling:EC2_INSTANCE_LAUNCH autoscaling:EC2_INSTANCE_LAUNCH_ERROR autoscaling:EC2_INSTANCE_TERMINATE autoscaling:EC2_INSTANCE_TERMINATE_ERROR),
+            # },
+             :Tags => [
+            {
+                :Key => 'Name',
+                # Grabs a value in an external map file.
+                :Value => find_in_map('TableExampleMap', 'corge', 'grault'),
+                :PropagateAtLaunch => 'true',
+            },
+            {
+                :Key => 'Label',
+                :Value => parameters['Label'],
+                :PropagateAtLaunch => 'true',
+            }
+        ],
+  }   
+
+
+
+  resource 'WaitConditionHandle', :Type => 'AWS::CloudFormation::WaitConditionHandle', :Properties => {}
+
+  resource 'WaitCondition', :Type => 'AWS::CloudFormation::WaitCondition', :DependsOn => 'ASG', :Properties => {
+            :Handle => ref('WaitConditionHandle'),
+            :Timeout => 1200,
+            :Count => "1"
+  }
+
+  resource 'LaunchConfig', :Type => 'AWS::AutoScaling::LaunchConfiguration', :Properties => {
+            :ImageId => parameters['ImageId'],
+            :KeyName => ref('KeyPairName'),
+    #        :IamInstanceProfile => ref('InstanceProfile'),
+            :InstanceType => ref('InstanceType'),
+            :InstanceMonitoring => 'false',
+            :SecurityGroups => [ref('SecurityGroup')],
+    # :BlockDeviceMappings => [
+    #     {:DeviceName => '/dev/sdb', :VirtualName => 'ephemeral0'},
+    #     {:DeviceName => '/dev/sdc', :VirtualName => 'ephemeral1'},
+    #     {:DeviceName => '/dev/sdd', :VirtualName => 'ephemeral2'},
+    #     {:DeviceName => '/dev/sde', :VirtualName => 'ephemeral3'},
+    # ],
+    # Loads an external userdata script with an interpolated argument.
+            :UserData => base64(interpolate(file('pre_install.sh'), time: Time.now)),
+  }
+
+#   output 'InstanceId',
+#          :Description => 'InstanceId of the newly created EC2 instance',
+#          :Value => ref('EC2Instance')
+
+#   output 'AZ',
+#          :Description => 'Availability Zone of the newly created EC2 instance',
+#          :Value => get_att('EC2Instance', 'AvailabilityZone')
+
+#   output 'PublicDNS',
+#          :Description => 'Public DNSName of the newly created EC2 instance',
+#          :Value => get_att('EC2Instance', 'PublicDnsName')
+
+#   output 'PublicIP',
+#          :Description => 'Public IP address of the newly created EC2 instance',
+#          :Value => get_att('EC2Instance', 'PublicIp')
 
 end.exec!
