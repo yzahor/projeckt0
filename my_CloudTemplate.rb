@@ -83,8 +83,8 @@ template do
             :Type => 'String',
             :MinLength => '1',
             :MaxLength => '40',
-            :Default => parameters['Label']
-            #:Default => 'free_tier_keys'
+            #:Default => parameters['Label']
+            :Default => 'free_tier_keys'
 
 #   parameter 'SSHLocation',
 #             :Description => 'The IP address range that can be used to SSH to the EC2 instances',
@@ -181,11 +181,11 @@ template do
 
   resource 'SecurityGroup', :Type => 'AWS::EC2::SecurityGroup', :Properties => {
       :GroupDescription => 'Lets any vpc traffic in.',
-      :SecurityGroupIngress => {:IpProtocol => '-1', :FromPort => '0', :ToPort => '65535', :CidrIp => "10.0.0.0/8"}
+      :SecurityGroupIngress => {:IpProtocol => '-1', :FromPort => '0', :ToPort => '65535', :CidrIp => "0.0.0.0/0"}
   }
 
   resource "ASG", :Type => 'AWS::AutoScaling::AutoScalingGroup', :Properties => {
-      :AvailabilityZones => 'us-east-2',
+      :AvailabilityZones => ['us-east-2a'],
       :HealthCheckType => 'EC2',
       :LaunchConfigurationName => ref('LaunchConfig'),
       :MinSize => 1,
