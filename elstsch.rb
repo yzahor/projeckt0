@@ -38,7 +38,7 @@ template do
   parameter 'ImageId',
             :Description => 'EC2 Image ID',
             :Type => 'String',
-            :Default => 'ami-40142d25',
+            :Default => 'ami-8c122be9',
             :AllowedPattern => 'ami-[a-f0-9]{8}',
             :ConstraintDescription => 'Must be ami-XXXXXXXX (where X is a hexadecimal digit)'
 
@@ -55,7 +55,7 @@ template do
             :'t2.micro' => { :Arch => 'HVM64' }
     
     mapping 'AWSRegionArch2AMI',
-            :'us-east-2' => { :PV64 => 'NOT_SUPPORTED', :HVM64 => 'ami-40142d25', :HVMG2 => 'NOT_SUPPORTED' }
+            :'us-east-2' => { :PV64 => 'NOT_SUPPORTED', :HVM64 => 'ami-8c122be9', :HVMG2 => 'NOT_SUPPORTED' }
   
 
   resource 'SecurityGroup', :Type => 'AWS::EC2::SecurityGroup', :Properties => {
@@ -80,7 +80,6 @@ template do
   resource "ASGElasticsearch", :Type => 'AWS::AutoScaling::AutoScalingGroup', :Properties => {
             :AvailabilityZones => ['us-east-2a'],
             :HealthCheckType => 'EC2',
-            #:InstanceID => ref('KibanaEC2Instance'),
             :LaunchConfigurationName => ref('LaunchConfigELS'),
             :MinSize => 1,
             :MaxSize => 5,
@@ -91,8 +90,6 @@ template do
             :Tags => [
             {
                 :Key => 'Name',
-                # Grabs a value in an external map file.
-                #:Value => find_in_map('TableExampleMap', 'corge', 'grault'),
                 :Value => 'Elasticsearch',
                 :PropagateAtLaunch => 'true',
             },
@@ -108,7 +105,6 @@ template do
   resource 'EmailSNSTopic', :Type => 'AWS::SNS::Topic', :Properties => {
     :Subscription => [
         {
-            #:Endpoint => ref('EmailAddress'),
             :Endpoint => 'yzaho@softserveinc.com',
             :Protocol => 'email',
         },
@@ -124,37 +120,14 @@ template do
 #   }
 
   resource 'LaunchConfigELS', :Type => 'AWS::AutoScaling::LaunchConfiguration', :Properties => {
-            :ImageId => 'ami-40142d25',
-            #:ImageId => find_in_map('AWSRegionArch2AMI', aws_region, find_in_map('AWSInstanceType2Arch', ref('InstanceType'), 'Arch')),
+            :ImageId => 'ami-8c122be9',
             :KeyName => ref('KeyPairName'),
-    #        :IamInstanceProfile => ref('InstanceProfile'),
             :InstanceType => ref('InstanceType'),
             :InstanceMonitoring => 'false',
             :SecurityGroups => [ref('SecurityGroup')],
-    # :BlockDeviceMappings => [
-    #     {:DeviceName => '/dev/sdb', :VirtualName => 'ephemeral0'},
-    #     {:DeviceName => '/dev/sdc', :VirtualName => 'ephemeral1'},
-    #     {:DeviceName => '/dev/sdd', :VirtualName => 'ephemeral2'},
-    #     {:DeviceName => '/dev/sde', :VirtualName => 'ephemeral3'},
-    # ],
     # Loads an external userdata script with an interpolated argument.
-            :UserData => base64(interpolate(file('preinstall.sh'), time: Time.now)),
+            :UserData => base64(interpolate(file('install_elstsch.sh'))),
   }
 
-#   output 'InstanceId',
-#          :Description => 'InstanceId of the newly created EC2 instance',
-#          :Value => ref('EC2Instance')
-
-#   output 'AZ',
-#          :Description => 'Availability Zone of the newly created EC2 instance',
-#          :Value => get_att('EC2Instance', 'AvailabilityZone')
-
-#   output 'PublicDNS',
-#          :Description => 'Public DNSName of the newly created EC2 instance',
-#          :Value => get_att('EC2Instance', 'PublicDnsName')
-
-#   output 'PublicIP',
-#          :Description => 'Public IP address of the newly created EC2 instance',
-#          :Value => get_att('EC2Instance', 'PublicIp')
 
 end.exec!
