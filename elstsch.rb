@@ -62,10 +62,22 @@ template do
             :GroupDescription => 'Enable SSH access via port 22',
             :SecurityGroupIngress => [
             {
-            :IpProtocol => 'tcp',
-            :FromPort => '22',
-            :ToPort => '22',
-            :CidrIp => ref('SSHLocation'),
+                :IpProtocol => 'tcp',
+                :FromPort => '22',
+                :ToPort => '22',
+                :CidrIp => ref('SSHLocation'),
+            },
+            {
+                :IpProtocol => 'tcp',
+                :FromPort => '80',
+                :ToPort => '80',
+                :CidrIp => ref('SSHLocation'),
+            },
+            {
+                :IpProtocol => 'tcp',
+                :FromPort => '8140',
+                :ToPort => '8140',
+                :CidrIp => ref('SSHLocation'),
             },
       ],
   }

@@ -39,7 +39,7 @@ template do
   parameter 'ImageId',
             :Description => 'EC2 Image ID',
             :Type => 'String',
-            :Default => 'ami-40142d25',
+            :Default => 'ami-8c122be9',
             :AllowedPattern => 'ami-[a-f0-9]{8}',
             :ConstraintDescription => 'Must be ami-XXXXXXXX (where X is a hexadecimal digit)'
 
@@ -58,17 +58,29 @@ template do
   
     
     mapping 'AWSRegionArch2AMI',
-            :'us-east-2' => { :PV64 => 'NOT_SUPPORTED', :HVM64 => 'ami-40142d25', :HVMG2 => 'NOT_SUPPORTED' }
+            :'us-east-2' => { :PV64 => 'NOT_SUPPORTED', :HVM64 => 'ami-8c122be9', :HVMG2 => 'NOT_SUPPORTED' }
             
   
   resource 'SecurityGroup', :Type => 'AWS::EC2::SecurityGroup', :Properties => {
             :GroupDescription => 'Enable SSH access via port 22',
             :SecurityGroupIngress => [
             {
-            :IpProtocol => 'tcp',
-            :FromPort => '22',
-            :ToPort => '22',
-            :CidrIp => ref('SSHLocation'),
+                :IpProtocol => 'tcp',
+                :FromPort => '22',
+                :ToPort => '22',
+                :CidrIp => ref('SSHLocation'),
+            },
+            {
+                :IpProtocol => 'tcp',
+                :FromPort => '80',
+                :ToPort => '80',
+                :CidrIp => ref('SSHLocation'),
+            },
+            {
+                :IpProtocol => 'tcp',
+                :FromPort => '8140',
+                :ToPort => '8140',
+                :CidrIp => ref('SSHLocation'),
             },
       ],
   }
@@ -128,10 +140,8 @@ template do
 #   }
 
   resource 'LaunchConfigKBN', :Type => 'AWS::AutoScaling::LaunchConfiguration', :Properties => {
-            :ImageId => 'ami-40142d25',
-            #:ImageId => find_in_map('AWSRegionArch2AMI', aws_region, find_in_map('AWSInstanceType2Arch', ref('InstanceType'), 'Arch')),
-            #:KeyName => ref('KeyPairName'),
-            :KeyName => parameter['KeyPairName']
+            :ImageId => 'ami-8c122be9',
+            :KeyName => ref('KeyPairName'),
     #        :IamInstanceProfile => ref('InstanceProfile'),
             :InstanceType => ref('InstanceType'),
             :InstanceMonitoring => 'false',
@@ -146,22 +156,5 @@ template do
             :UserData => base64(interpolate(file('preinstall.sh'))),
             
     }
-
-
-#   output 'InstanceId',
-#          :Description => 'InstanceId of the newly created EC2 instance',
-#          :Value => ref('EC2Instance')
-
-#   output 'AZ',
-#          :Description => 'Availability Zone of the newly created EC2 instance',
-#          :Value => get_att('EC2Instance', 'AvailabilityZone')
-
-#   output 'PublicDNS',
-#          :Description => 'Public DNSName of the newly created EC2 instance',
-#          :Value => get_att('EC2Instance', 'PublicDnsName')
-
-#   output 'PublicIP',
-#          :Description => 'Public IP address of the newly created EC2 instance',
-#          :Value => get_att('EC2Instance', 'PublicIp')
 
 end.exec!
