@@ -23,17 +23,9 @@ package { 'java-1.8.0-openjdk.x86_64':
 package { 'elasticsearch':
   require => Exec['yum update'],        # require 'yum update' before installing
   ensure => installed,
-  require => Package['java'],        # require 'java' package before creating
 }
 
 # ensure Eelasticsearch service is running
 service { 'elasticsearch':
   ensure => running,
-}
-
-# ensure info.php file exists
-file { '/var/www/html/info.php':
-  ensure => file,
-  content => '<?php  phpinfo(); ?>',    # phpinfo code
-  require => Package['httpd'],        # require 'apache2' package before creating
 }
