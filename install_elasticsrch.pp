@@ -25,7 +25,14 @@ package { 'elasticsearch':
   ensure => installed,
 }
 
-# ensure Eelasticsearch service is running
+# ensure Elasticsearch service is running
 service { 'elasticsearch':
   ensure => running,
 }
+
+#Install Augeas
+package { 'augeas':
+  require => Exec['yum update'],        # require 'yum update' before installing
+  ensure => installed,
+}
+

@@ -153,7 +153,7 @@ template do
     #     {:DeviceName => '/dev/sde', :VirtualName => 'ephemeral3'},
     # ],
     # Loads an external userdata script with an interpolated argument.
-            :UserData => base64(interpolate(file('preinstall.sh'))),
+            :UserData => base64(interpolate(file('kibana_preinstall.sh'))),
             
     }
 

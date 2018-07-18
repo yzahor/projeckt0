@@ -51,6 +51,33 @@ template do
             :AllowedPattern => '(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})',
             :ConstraintDescription => 'must be a valid IP CIDR range of the form x.x.x.x/x.'
 
+  parameter 'HTTPHTTPSLocation',
+            :Description => 'The IP address range that can be used to SSH to the EC2 instances',
+            :Type => 'String',
+            :MinLength => '9',
+            :MaxLength => '18',
+            :Default => '0.0.0.0/0',
+            :AllowedPattern => '(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})',
+            :ConstraintDescription => 'must be a valid IP CIDR range of the form x.x.x.x/x.'
+
+  parameter 'PuppetLocation',
+            :Description => 'The IP address range that can be used to SSH to the EC2 instances',
+            :Type => 'String',
+            :MinLength => '9',
+            :MaxLength => '18',
+            :Default => '0.0.0.0/0',
+            :AllowedPattern => '(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})',
+            :ConstraintDescription => 'must be a valid IP CIDR range of the form x.x.x.x/x.'
+    
+  parameter 'ElasticsearchLocation',
+            :Description => 'The IP address range that can be used to SSH to the EC2 instances',
+            :Type => 'String',
+            :MinLength => '9',
+            :MaxLength => '18',
+            :Default => '0.0.0.0/0',
+            :AllowedPattern => '(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})',
+            :ConstraintDescription => 'must be a valid IP CIDR range of the form x.x.x.x/x.'
+
     mapping 'AWSInstanceType2Arch',
             :'t2.micro' => { :Arch => 'HVM64' }
     
@@ -59,7 +86,7 @@ template do
   
 
   resource 'SecurityGroup', :Type => 'AWS::EC2::SecurityGroup', :Properties => {
-            :GroupDescription => 'Enable SSH access via port 22',
+            :GroupDescription => 'Enable SSH,HTTP,HTTPS,Puppet access via port 22,80,443,8140',
             :SecurityGroupIngress => [
             {
                 :IpProtocol => 'tcp',
@@ -71,13 +98,25 @@ template do
                 :IpProtocol => 'tcp',
                 :FromPort => '80',
                 :ToPort => '80',
-                :CidrIp => ref('SSHLocation'),
+                :CidrIp => ref('HTTPHTTPSLocation'),
+            },
+            {
+                :IpProtocol => 'tcp',
+                :FromPort => '9200',
+                :ToPort => '9200',
+                :CidrIp => ref('ElasticsearchLocation'),
             },
             {
                 :IpProtocol => 'tcp',
                 :FromPort => '8140',
                 :ToPort => '8140',
-                :CidrIp => ref('SSHLocation'),
+                :CidrIp => ref('PuppetLocation'),
+            },
+            {
+                :IpProtocol => 'tcp',
+                :FromPort => '443',
+                :ToPort => '443',
+                :CidrIp => ref('HTTPHTTPSLocation'),
             },
       ],
   }
@@ -138,7 +177,7 @@ template do
             :InstanceMonitoring => 'false',
             :SecurityGroups => [ref('SecurityGroup')],
     # Loads an external userdata script with an interpolated argument.
-            :UserData => base64(interpolate(file('install_elstsch.sh'))),
+            :UserData => base64(interpolate(file('elastic_preinstall.sh'))),
   }
 
 
