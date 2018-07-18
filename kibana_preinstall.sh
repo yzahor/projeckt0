@@ -8,7 +8,7 @@ sudo /opt/puppetlabs/bin/puppet resource service puppet ensure=running enable=tr
 sudo /opt/puppetlabs/bin/puppet module install puppet-yum
 sudo mkdir /opt/puppetlabs/manifests
 cd /opt/puppetlabs/manifests
-sudo wget https://raw.githubusercontent.com/yzahor/project0/firstbranch/install_elasticsrch.pp && sudo /opt/puppetlabs/bin/puppet apply install_kibana.pp
+sudo wget https://raw.githubusercontent.com/yzahor/project0/firstbranch/install_kibana.pp && sudo /opt/puppetlabs/bin/puppet apply install_kibana.pp
 
 # sudo apt install -y aws-cfn-bootstrap
 # sudo /opt/aws/bin/cfn-signal -e 0 --stack, {"Ref": "AWS::StackName"}, 

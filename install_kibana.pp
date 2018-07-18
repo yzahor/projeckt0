@@ -5,7 +5,7 @@ yumrepo { "Kibana_repository_for_6.x_packages":
   enabled => 1,
   gpgcheck => true,
   gpgkey => 'https://packages.elastic.co/GPG-KEY-elasticsearch',
-  target => '/etc/yum.repos.d/elastic-6.x.repo',
+  target => '/etc/yum.repos.d/kibana-6.x.repo',
 }  
 
 # execute 'yum update'
