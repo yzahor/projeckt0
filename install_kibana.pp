@@ -36,3 +36,29 @@ package { 'augeas':
   ensure => installed,
 }
 
+#Add Nginx repository
+yumrepo { "Nginx_repository":
+  baseurl => "http://nginx.org/packages/centos/$releasever/$basearch/",
+  descr => "Nginx repository",
+  enabled => 1,
+  gpgcheck => true,
+  gpgkey => 'http://nginx.org/keys/nginx_signing.key',
+  target => '/etc/yum.repos.d/nginx.repo',
+} 
+
+# install Nginx package
+package { 'nginx':
+  require => Exec['yum update'],        # require 'yum update' before installing
+  ensure => installed,
+}
+
+# install httpd-tools package
+package { 'httpd-tools':
+  require => Exec['yum update'],        # require 'yum update' before installing
+  ensure => installed,
+}
+
+# ensure Kibana service is running
+service { 'nginx':
+  ensure => running,
+}
