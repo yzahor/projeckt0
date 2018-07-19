@@ -43,15 +43,70 @@ template do
             :AllowedPattern => 'ami-[a-f0-9]{8}',
             :ConstraintDescription => 'Must be ami-XXXXXXXX (where X is a hexadecimal digit)'
 
-  parameter 'SSHLocation',
+  parameter 'SSHLocationSS',
             :Description => 'The IP address range that can be used to SSH to the EC2 instances',
             :Type => 'String',
             :MinLength => '9',
             :MaxLength => '18',
-            :Default => '0.0.0.0/0',
+            :Default => '185.112.173.114/32',
+            :AllowedPattern => '(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})',
+            :ConstraintDescription => 'must be a valid IP CIDR range of the form x.x.x.x/x.'
+    
+  parameter 'SSHLocationBV',
+            :Description => 'The IP address range that can be used to SSH to the EC2 instances',
+            :Type => 'String',
+            :MinLength => '9',
+            :MaxLength => '18',
+            :Default => '216.166.20.1/32',
+            :AllowedPattern => '(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})',
+            :ConstraintDescription => 'must be a valid IP CIDR range of the form x.x.x.x/x.'
+    
+  parameter 'HTTPHTTPSLocationSS',
+            :Description => 'The IP address range that can be used to SSH to the EC2 instances',
+            :Type => 'String',
+            :MinLength => '9',
+            :MaxLength => '18',
+            :Default => '185.112.173.114/32',
             :AllowedPattern => '(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})',
             :ConstraintDescription => 'must be a valid IP CIDR range of the form x.x.x.x/x.'
 
+  parameter 'HTTPHTTPSLocationBV',
+            :Description => 'The IP address range that can be used to SSH to the EC2 instances',
+            :Type => 'String',
+            :MinLength => '9',
+            :MaxLength => '18',
+            :Default => '216.166.20.1/32',
+            :AllowedPattern => '(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})',
+            :ConstraintDescription => 'must be a valid IP CIDR range of the form x.x.x.x/x.'
+
+  parameter 'PuppetLocation',
+            :Description => 'The IP address range that can be used to SSH to the EC2 instances',
+            :Type => 'String',
+            :MinLength => '9',
+            :MaxLength => '18',
+            :Default => '185.112.173.114/32',
+            :AllowedPattern => '(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})',
+            :ConstraintDescription => 'must be a valid IP CIDR range of the form x.x.x.x/x.'
+    
+  parameter 'ElasticsearchLocationSS',
+            :Description => 'The IP address range that can be used to SSH to the EC2 instances',
+            :Type => 'String',
+            :MinLength => '9',
+            :MaxLength => '18',
+            :Default => '185.112.173.114/32',
+            :AllowedPattern => '(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})',
+            :ConstraintDescription => 'must be a valid IP CIDR range of the form x.x.x.x/x.'
+  
+  parameter 'KibanaLocationSS',
+            :Description => 'The IP address range that can be used to SSH to the EC2 instances',
+            :Type => 'String',
+            :MinLength => '9',
+            :MaxLength => '18',
+            :Default => '185.112.173.114/32',
+            :AllowedPattern => '(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})',
+            :ConstraintDescription => 'must be a valid IP CIDR range of the form x.x.x.x/x.'
+
+    
     mapping 'AWSInstanceType2Arch',
             :'t2.micro' => { :Arch => 'HVM64' }
             
@@ -62,27 +117,64 @@ template do
             
   
   resource 'SecurityGroup', :Type => 'AWS::EC2::SecurityGroup', :Properties => {
-            :GroupDescription => 'Enable SSH access via port 22',
+            :GroupDescription => 'Enable SSH,HTTP,HTTPS,Puppet access via port 22,80,443,8140,9200',
             :SecurityGroupIngress => [
             {
                 :IpProtocol => 'tcp',
                 :FromPort => '22',
                 :ToPort => '22',
-                :CidrIp => ref('SSHLocation'),
+                :CidrIp => ref('SSHLocationSS'), 
             },
             {
                 :IpProtocol => 'tcp',
                 :FromPort => '80',
                 :ToPort => '80',
-                :CidrIp => ref('SSHLocation'),
+                :CidrIp => ref('HTTPHTTPSLocationSS'),
+            },
+            {
+                :IpProtocol => 'tcp',
+                :FromPort => '5601',
+                :ToPort => '5601',
+                :CidrIp => ref('KibanaLocationSS'), 
             },
             {
                 :IpProtocol => 'tcp',
                 :FromPort => '8140',
                 :ToPort => '8140',
-                :CidrIp => ref('SSHLocation'),
+                :CidrIp => ref('PuppetLocation'),
             },
-      ],
+            {
+                :IpProtocol => 'tcp',
+                :FromPort => '22',
+                :ToPort => '22',
+                :CidrIp => ref('SSHLocationBV'), 
+            },
+            {
+                :IpProtocol => 'tcp',
+                :FromPort => '80',
+                :ToPort => '80',
+                :CidrIp => ref('HTTPHTTPSLocationBV'),
+            },
+            {
+                :IpProtocol => 'tcp',
+                :FromPort => '443',
+                :ToPort => '443',
+                :CidrIp => ref('HTTPHTTPSLocationBV'),
+            },
+            {
+                :IpProtocol => 'tcp',
+                :FromPort => '5601',
+                :ToPort => '5601',
+                :CidrIp => ref('KibanaLocationBV'), 
+            },
+           
+        ],
+            :Tags => [
+            {
+                :Key => 'Name',
+                :Value => 'ELKCluster',
+            },
+        ],
   }
 
 

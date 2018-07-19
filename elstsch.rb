@@ -86,7 +86,7 @@ template do
   
 
   resource 'SecurityGroup', :Type => 'AWS::EC2::SecurityGroup', :Properties => {
-            :GroupDescription => 'Enable SSH,HTTP,HTTPS,Puppet access via port 22,80,443,8140',
+            :GroupDescription => 'Enable SSH,HTTP,HTTPS,Puppet access via port 22,80,443,8140,9200',
             :SecurityGroupIngress => [
             {
                 :IpProtocol => 'tcp',
@@ -118,7 +118,14 @@ template do
                 :ToPort => '443',
                 :CidrIp => ref('HTTPHTTPSLocation'),
             },
-      ],
+            
+        ],
+            :Tags => [
+            {
+                :Key => 'Name',
+                :Value => 'ELKCluster',
+            },
+        ]
   }
 
 

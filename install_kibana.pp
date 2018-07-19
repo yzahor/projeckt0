@@ -1,5 +1,5 @@
 #Add Kibana repository
-yumrepo { "Kibana_repository_for_6.x_packages":
+yumrepo { "kibana-6.x":
   baseurl => "https://artifacts.elastic.co/packages/6.x/yum",
   descr => "Kibana repository for 6.x packages",
   enabled => 1,
@@ -37,13 +37,13 @@ package { 'augeas':
 }
 
 #Add Nginx repository
-yumrepo { "Nginx_repository":
-  baseurl => "http://nginx.org/packages/centos/$releasever/$basearch/",
-  descr => "Nginx repository",
+yumrepo { "epel-relise":
+  baseurl => "https://dl.fedoraproject.org/pub/epel/7/x86_64/",
+  descr => "EPEL repository",
   enabled => 1,
   gpgcheck => true,
-  gpgkey => 'http://nginx.org/keys/nginx_signing.key',
-  target => '/etc/yum.repos.d/nginx.repo',
+  gpgkey => 'https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7'
+  target => '/etc/yum.repos.d/epel-relise.repo',
 } 
 
 # install Nginx package
